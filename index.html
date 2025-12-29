@@ -10,6 +10,38 @@
     <style>
         :root { --bg: #010603; --card-glass: rgba(0, 20, 10, 0.75); --accent: #20e37c; --gold: #f1c40f; --player: #1e88e5; --banker: #e53935; --tie: #43a047; --gemini: #8e44ad; }
         body { background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), url('https://images.unsplash.com/photo-1511193311914-0346f16efe90?q=80&w=2073&auto=format&fit=crop'); background-size: cover; color: #fff; font-family: 'Prompt', sans-serif; min-height: 100vh; padding: 15px; }
+        
+        /* --- ส่วนที่เพิ่ม: สไตล์ Login เซียนหรั่งสีทองประกาย --- */
+        #loginOverlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; display: flex; justify-content: center; align-items: center; z-index: 99999;
+        }
+        .login-card {
+            background: rgba(20, 20, 20, 0.9); border: 1px solid var(--gold);
+            padding: 40px; border-radius: 25px; text-align: center; width: 350px;
+        }
+        .logo-gold {
+            font-size: 3.5rem; font-weight: 800; margin-bottom: 10px;
+            background: linear-gradient(to bottom, #fff58f 0%, #f1c40f 45%, #b8860b 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 15px rgba(241, 196, 15, 0.9)); /* ประกายทอง */
+            animation: gold-glow 1.5s infinite alternate;
+        }
+        @keyframes gold-glow {
+            from { filter: drop-shadow(0 0 10px rgba(241, 196, 15, 0.6)); }
+            to { filter: drop-shadow(0 0 25px rgba(241, 196, 15, 1)); }
+        }
+        .login-card input {
+            width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px;
+            border: 1px solid #444; background: #111; color: #fff;
+        }
+        .btn-gold {
+            width: 100%; padding: 12px; background: var(--gold); border: none;
+            border-radius: 10px; color: #000; font-weight: 800; cursor: pointer;
+        }
+        #mainSystem { display: none; } /* ซ่อนหน้าหลักไว้ก่อน */
+
+        /* --- โค้ด STYLE เดิมของคุณ (ห้ามลบ) --- */
         .master-wrapper { display: flex; justify-content: center; gap: 20px; max-width: 1300px; margin: auto; flex-wrap: wrap; }
         .master-container { width: 100%; max-width: 450px; }
         .analyzer-container { width: 100%; max-width: 550px; }
@@ -21,18 +53,15 @@
         .btn-glass { background: linear-gradient(45deg, rgba(32, 227, 124, 0.2), rgba(32, 227, 124, 0.4)); color: #fff; border: 1px solid var(--accent); border-radius: 12px; padding: 12px; width: 100%; font-weight: 800; transition: 0.3s; }
         .btn-glass:hover { box-shadow: 0 0 20px var(--accent); transform: translateY(-2px); }
         .road-container { display: flex; gap: 4px; overflow-x: auto; padding: 10px; background: rgba(0,0,0,0.4); border-radius: 12px; height: 130px; }
-        
         .god-grid-100 { display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; margin-top: 10px; }
         .cell-ai { aspect-ratio: 1; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; font-weight: 900; border: 1px solid rgba(255,255,255,0.1); transition: 0.3s; background: rgba(255,255,255,0.02); position: relative; overflow: hidden; }
         .cell-ai.player-glow { background: rgba(30, 136, 229, 0.15); border-color: var(--player); box-shadow: inset 0 0 10px var(--player), 0 0 5px var(--player); color: #fff; text-shadow: 0 0 10px var(--player); }
         .cell-ai.banker-glow { background: rgba(229, 57, 53, 0.15); border-color: var(--banker); box-shadow: inset 0 0 10px var(--banker), 0 0 5px var(--banker); color: #fff; text-shadow: 0 0 10px var(--banker); }
-
         .ai-core-tag { font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; margin: 2px; display: inline-block; font-weight: 800; }
         .gemini-analysis-box { background: rgba(142, 68, 173, 0.1); border: 2px solid var(--gemini); border-radius: 15px; padding: 15px; margin-top: 15px; box-shadow: 0 0 20px rgba(142, 68, 173, 0.2); }
         .ai-pulse { animation: pulse-border 1.5s infinite; }
         @keyframes pulse-border { 0%, 100% { border-color: var(--accent); box-shadow: 0 0 10px var(--accent); } 50% { border-color: var(--gemini); box-shadow: 0 0 25px var(--gemini); } }
         .micro-perc { font-size: 6px; position: absolute; bottom: 2px; width: 100%; text-align: center; opacity: 0.8; font-weight: 400; }
-
         .manual-btns { display: flex; justify-content: center; gap: 10px; margin-top: 12px; }
         .m-btn { width: 45px; height: 45px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.3); color: #fff; font-weight: 800; cursor: pointer; transition: 0.2s; position: relative; }
         .m-btn:active { transform: scale(0.9); }
@@ -40,74 +69,95 @@
 </head>
 <body>
 
-<div class="master-wrapper">
-    <div class="master-container">
-        <div class="elite-card text-center">
-            <h5 style="color:var(--gold); font-weight: 800;">JIRAPAS AI : SUPREME GOD MODE</h5>
-            <div class="row g-2">
-                <div class="col-6"><input type="text" id="game" class="form-control bg-dark text-white border-secondary" value="sa"></div>
-                <div class="col-6"><input type="text" id="table" class="form-control bg-dark text-white border-secondary" placeholder="ระบุโต๊ะ"></div>
-                <div class="col-12"><button class="btn btn-glass mt-2" onclick="startAutoSystem()">ACTIVATE SUPREME ENGINE</button></div>
-            </div>
-            
-            <div class="manual-btns">
-                <button class="m-btn" style="background:var(--player); box-shadow: 0 0 15px var(--player);" onclick="addManual('P')">P</button>
-                <button class="m-btn" style="background:var(--banker); box-shadow: 0 0 15px var(--banker);" onclick="addManual('B')">B</button>
-                <button class="m-btn" style="background:var(--tie); box-shadow: 0 0 15px var(--tie);" onclick="addManual('T')">T</button>
-                <button class="m-btn" style="background:#f39c12; box-shadow: 0 0 15px #f39c12; border-color: #e67e22;" onclick="deleteLast()" title="ลบตัวล่าสุด">DEL</button>
-                <button class="m-btn" style="background:#cc0000; box-shadow: 0 0 20px #ff0000; border-color: #ff3333;" onclick="clearManual()" title="ลบทั้งหมด">CL</button>
-            </div>
-        </div>
-
-        <div class="elite-card">
-            <div class="d-flex justify-content-between">
-                <h6 id="roomTitle" style="color:var(--gold); font-weight: 800;">-- STANDBY --</h6>
-                <h4 id="apiProb" style="color:var(--accent); font-weight: 800;">100%</h4>
-            </div>
-            <div class="predict-box ai-pulse" id="mainPredictBox">
-                <div id="mainPredict" class="predict-text">WAIT</div>
-                <div id="aiAnalysis" class="mt-2" style="font-size: 0.85rem; color: #fff;">ระบบกำลังวิเคราะห์ 4 คอร์ร่วมกัน...</div>
-            </div>
-            <div class="d-flex justify-content-between px-2" style="font-size: 13px; font-weight: 800;">
-                <span style="color:var(--player)">P-POWER: <span id="pRate">50</span>%</span>
-                <span style="color:var(--banker)">B-POWER: <span id="bRate">50</span>%</span>
-            </div>
-            <div class="progress mt-2" style="height: 10px; background: #222;">
-                <div id="pBar" class="progress-bar" style="width: 50%; background: var(--player);"></div>
-                <div id="bBar" class="progress-bar" style="width: 50%; background: var(--banker);"></div>
-            </div>
-        </div>
-        <div class="elite-card" style="padding: 10px;"><div class="road-container" id="roadMap"></div></div>
+<div id="loginOverlay">
+    <div class="login-card">
+        <div class="logo-gold">เซียนหรั่ง</div>
+        <input type="text" id="user" placeholder="USERNAME">
+        <input type="password" id="pass" placeholder="PASSWORD">
+        <button class="btn-gold" onclick="doLogin()">AUTHORIZE ACCESS</button>
     </div>
+</div>
 
-    <div class="analyzer-container">
-        <div class="elite-card">
-            <div class="text-center mb-3">
-                <span class="ai-core-tag" style="border: 1px solid var(--accent); color: var(--accent);">CORE 1: PATTERN</span>
-                <span class="ai-core-tag" style="border: 1px solid var(--gold); color: var(--gold);">CORE 2: CHAOS</span>
-                <span class="ai-core-tag" style="border: 1px solid var(--gemini); color: var(--gemini);">CORE 3: GEMINI AI</span>
+<div id="mainSystem">
+    <div class="master-wrapper">
+        <div class="master-container">
+            <div class="elite-card text-center">
+                <h5 style="color:var(--gold); font-weight: 800;">JIRAPAS AI : SUPREME GOD MODE</h5>
+                <div class="row g-2">
+                    <div class="col-6"><input type="text" id="game" class="form-control bg-dark text-white border-secondary" value="sa"></div>
+                    <div class="col-6"><input type="text" id="table" class="form-control bg-dark text-white border-secondary" placeholder="ระบุโต๊ะ"></div>
+                    <div class="col-12"><button class="btn btn-glass mt-2" onclick="startAutoSystem()">ACTIVATE SUPREME ENGINE</button></div>
+                </div>
+                
+                <div class="manual-btns">
+                    <button class="m-btn" style="background:var(--player); box-shadow: 0 0 15px var(--player);" onclick="addManual('P')">P</button>
+                    <button class="m-btn" style="background:var(--banker); box-shadow: 0 0 15px var(--banker);" onclick="addManual('B')">B</button>
+                    <button class="m-btn" style="background:var(--tie); box-shadow: 0 0 15px var(--tie);" onclick="addManual('T')">T</button>
+                    <button class="m-btn" style="background:#f39c12; box-shadow: 0 0 15px #f39c12; border-color: #e67e22;" onclick="deleteLast()" title="ลบตัวล่าสุด">DEL</button>
+                    <button class="m-btn" style="background:#cc0000; box-shadow: 0 0 20px #ff0000; border-color: #ff3333;" onclick="clearManual()" title="ลบทั้งหมด">CL</button>
+                </div>
             </div>
-            <h6 style="color:#aaa; font-size: 0.7rem; text-align: center; letter-spacing: 1px;">LOGIC MATRIX ANALYZER (AURA MODE)</h6>
-            <div class="god-grid-100" id="godGrid"></div>
-            <div class="gemini-analysis-box">
-                <h6 style="color:var(--gemini); font-weight: 800; text-align: center;">GEMINI AI DEEP ANALYZER (100% ACCURACY)</h6>
-                <div class="god-grid-100" id="geminiGrid"></div>
-                <div id="geminiComment" class="mt-3 text-center" style="font-size: 0.8rem; color:#fff; font-style: italic;">"กำลังตรวจสอบ..."</div>
+
+            <div class="elite-card">
+                <div class="d-flex justify-content-between">
+                    <h6 id="roomTitle" style="color:var(--gold); font-weight: 800;">-- STANDBY --</h6>
+                    <h4 id="apiProb" style="color:var(--accent); font-weight: 800;">100%</h4>
+                </div>
+                <div class="predict-box ai-pulse" id="mainPredictBox">
+                    <div id="mainPredict" class="predict-text">WAIT</div>
+                    <div id="aiAnalysis" class="mt-2" style="font-size: 0.85rem; color: #fff;">ระบบกำลังวิเคราะห์ 4 คอร์ร่วมกัน...</div>
+                </div>
+                <div class="d-flex justify-content-between px-2" style="font-size: 13px; font-weight: 800;">
+                    <span style="color:var(--player)">P-POWER: <span id="pRate">50</span>%</span>
+                    <span style="color:var(--banker)">B-POWER: <span id="bRate">50</span>%</span>
+                </div>
+                <div class="progress mt-2" style="height: 10px; background: #222;">
+                    <div id="pBar" class="progress-bar" style="width: 50%; background: var(--player);"></div>
+                    <div id="bBar" class="progress-bar" style="width: 50%; background: var(--banker);"></div>
+                </div>
             </div>
-            <div class="mt-3 p-3 text-center" style="background: rgba(0,0,0,0.5); border-radius: 15px; border: 1px solid var(--accent);">
-                <div id="aiSuggestBox" style="font-size: 1.5rem; font-weight: 800;">...</div>
-                <div id="roomComment" style="font-size: 0.8rem; color: #0f0;">SUPER AI LOGIC STABLE</div>
+            <div class="elite-card" style="padding: 10px;"><div class="road-container" id="roadMap"></div></div>
+        </div>
+
+        <div class="analyzer-container">
+            <div class="elite-card">
+                <div class="text-center mb-3">
+                    <span class="ai-core-tag" style="border: 1px solid var(--accent); color: var(--accent);">CORE 1: PATTERN</span>
+                    <span class="ai-core-tag" style="border: 1px solid var(--gold); color: var(--gold);">CORE 2: CHAOS</span>
+                    <span class="ai-core-tag" style="border: 1px solid var(--gemini); color: var(--gemini);">CORE 3: GEMINI AI</span>
+                </div>
+                <h6 style="color:#aaa; font-size: 0.7rem; text-align: center; letter-spacing: 1px;">LOGIC MATRIX ANALYZER (AURA MODE)</h6>
+                <div class="god-grid-100" id="godGrid"></div>
+                <div class="gemini-analysis-box">
+                    <h6 style="color:var(--gemini); font-weight: 800; text-align: center;">GEMINI AI DEEP ANALYZER (100% ACCURACY)</h6>
+                    <div class="god-grid-100" id="geminiGrid"></div>
+                    <div id="geminiComment" class="mt-3 text-center" style="font-size: 0.8rem; color:#fff; font-style: italic;">"กำลังตรวจสอบ..."</div>
+                </div>
+                <div class="mt-3 p-3 text-center" style="background: rgba(0,0,0,0.5); border-radius: 15px; border: 1px solid var(--accent);">
+                    <div id="aiSuggestBox" style="font-size: 1.5rem; font-weight: 800;">...</div>
+                    <div id="roomComment" style="font-size: 0.8rem; color: #0f0;">SUPER AI LOGIC STABLE</div>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
 <script>
+    // --- ฟังก์ชัน Login ที่เพิ่มใหม่ ---
+    function doLogin() {
+        const u = document.getElementById('user').value;
+        const p = document.getElementById('pass').value;
+        if(u === "admin" && p === "123") {
+            document.getElementById('loginOverlay').style.display = 'none';
+            document.getElementById('mainSystem').style.display = 'block';
+        } else { alert("รหัสผิด!"); }
+    }
+
+    // --- โค้ด JAVASCRIPT เดิมของคุณทั้งหมด (ห้ามลบ) ---
     let lastData = "";
     let autoInterval = null;
     let manualHistory = [];
 
-    // อัปเกรดฐานข้อมูล 8 ชุดเพื่อความแม่นยำสูงสุด
     const SUPREME_PATTERNS = [
         "PPPPPBBBBBBBBPPBPBPPPPPBPBPBBBBPBBBBPBBPPBBBPBBPPPBPBBPPBPB", 
         "BBBPBBPBBPPPBBBPBBPBBPBBBBPPBBBPPBBPBPPPPBBPPPPBBPPPPPBPBB",
@@ -178,7 +228,6 @@
         updateMainUI(decision, history);
     }
 
-    // อัปเกรดสมอง AI เช็คความลึก 6, 5, 4 ตำแหน่ง
     function geminiBrain(history) {
         if(history.length === 0) return { side: 'WAIT', confidence: 'STANDBY' };
         const str = history.join('');
